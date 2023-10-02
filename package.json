@@ -1,38 +1,41 @@
 {
-  "name": "be-nc-news",
-  "version": "1.0.0",
-  "description": "bc-nc-news",
-  "main": "index.js",
-  "scripts": {
-    "setup-dbs": "psql -f ./db/setup.sql",
-    "seed": "node ./db/seeds/run-seed.js",
-    "test": "jest",
-    "prepare": "husky install"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/northcoders/be-nc-news.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/northcoders/be-nc-news/issues"
-  },
-  "homepage": "https://github.com/northcoders/be-nc-news#readme",
-  "devDependencies": {
-    "husky": "^8.0.2",
-    "jest": "^27.5.1",
-    "jest-extended": "^2.0.0",
-    "pg-format": "^1.0.4"
-  },
-  "dependencies": {
-    "dotenv": "^16.0.0",
-    "pg": "^8.7.3"
-  },
-  "jest": {
-    "setupFilesAfterEnv": [
-      "jest-extended/all"
-    ]
-  }
+	"name": "be-nc-news",
+	"version": "1.0.0",
+	"description": "bc-nc-news",
+	"main": "index.js",
+	"scripts": {
+		"setup-dbs": "psql -f ./db/setup.sql",
+		"seed": "node ./db/seeds/run-seed.js",
+		"test": "jest",
+		"prepare": "husky install",
+		"playground": "psql -f playground.sql > playground.txt"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/northcoders/be-nc-news.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/northcoders/be-nc-news/issues"
+	},
+	"homepage": "https://github.com/northcoders/be-nc-news#readme",
+	"devDependencies": {
+		"husky": "^8.0.2",
+		"jest": "^27.5.1",
+		"jest-extended": "^2.0.0",
+		"pg-format": "^1.0.4"
+	},
+	"dependencies": {
+		"dotenv": "^16.0.0",
+		"express": "^4.18.2",
+		"pg": "^8.7.3",
+		"supertest": "^6.3.3"
+	},
+	"jest": {
+		"setupFilesAfterEnv": [
+			"jest-extended/all"
+		]
+	}
 }
