@@ -54,3 +54,39 @@ describe('GET /api endpoints', () => {
 			});
 	});
 });
+
+describe('GET /api/articles/:article_id', () => {
+	test('GET:200 sends a single article to the client', () => {
+		return request(app)
+			.get('/api/articles/1')
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.article).toMatchObject({
+					article_id: 1,
+					title: expect.any(String),
+					topic: expect.any(String),
+					author: expect.any(String),
+					body: expect.any(String),
+					created_at: expect.any(String),
+					votes: expect.any(Number),
+					article_img_url: expect.any(String),
+				});
+			});
+	});
+	test('GET:404 sends an appropriate status and error message when given a valid but non-existent id', () => {
+		return request(app)
+			.get('/api/articles/999')
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe('Article does not exist');
+			});
+	});
+	test('GET:400 sends an appropriate status and error message when given an invalid id', () => {
+		return request(app)
+			.get('/api/articles/not-an-article')
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad request');
+			});
+	});
+});
