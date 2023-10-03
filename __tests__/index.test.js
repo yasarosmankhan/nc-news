@@ -13,8 +13,8 @@ describe('GET /api/topics', () => {
 			.get('/api/topics')
 			.expect(200)
 			.then(({ body }) => {
-				expect(body.topic.length).toBe(3);
-				body.topic.forEach((topic) => {
+				expect(body.topics.length).toBe(3);
+				body.topics.forEach((topic) => {
 					expect(topic).toMatchObject({
 						slug: expect.any(String),
 						description: expect.any(String),
@@ -30,7 +30,7 @@ describe('GET /api/invalid-path', () => {
 			.get('/api/invalid-path')
 			.expect(404)
 			.then(({ body }) => {
-				expect(body.message).toBe('Not Found!');
+				expect(body.message).toBe('Wrong Path!');
 			});
 	});
 });

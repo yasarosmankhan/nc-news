@@ -1,13 +1,14 @@
 const express = require('express');
 const app = express();
-const { getTopics, getEndPoints } = require('./controllers/topic.controllers');
+const { getTopics } = require('./controllers/topics.controllers');
+const { getEndPoints } = require('./controllers/endpoints.controllers');
 
 app.get('/api/topics', getTopics);
 
 app.get('/api', getEndPoints);
 
-app.all('/api/*', (req, res, next) => {
-	res.status(404).send({ message: 'Not Found!' });
+app.all('/*', (req, res, next) => {
+	res.status(404).send({ message: 'Wrong Path!' });
 });
 
 app.use((err, req, res, next) => {
