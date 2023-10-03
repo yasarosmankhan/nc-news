@@ -61,18 +61,16 @@ describe('GET /api/articles/:article_id', () => {
 			.get('/api/articles/1')
 			.expect(200)
 			.then(({ body }) => {
-				for (const key in body) {
-					expect(body[key]).toMatchObject({
-						article_id: expect.any(Number),
-						title: expect.any(String),
-						topic: expect.any(String),
-						author: expect.any(String),
-						body: expect.any(String),
-						created_at: expect.any(String),
-						votes: expect.any(Number),
-						article_img_url: expect.any(String),
-					});
-				}
+				expect(body.article).toMatchObject({
+					article_id: 1,
+					title: expect.any(String),
+					topic: expect.any(String),
+					author: expect.any(String),
+					body: expect.any(String),
+					created_at: expect.any(String),
+					votes: expect.any(Number),
+					article_img_url: expect.any(String),
+				});
 			});
 	});
 	test('GET:404 sends an appropriate status and error message when given a valid but non-existent id', () => {
