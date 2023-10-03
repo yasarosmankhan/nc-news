@@ -1,6 +1,6 @@
 const db = require('../db/connection');
 
-exports.selectArticlesById = (article_id) => {
+exports.selectArticleById = (article_id) => {
 	if (isNaN(article_id)) {
 		return Promise.reject({
 			status: 400,

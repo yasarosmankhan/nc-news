@@ -2,7 +2,9 @@ const express = require('express');
 const app = express();
 const { getTopics } = require('./controllers/topics.controllers');
 const { getEndPoints } = require('./controllers/endpoints.controllers');
-const { getArticlesById } = require('./controllers/articles.controllers');
+const {
+	getArticleById: getArticlesById,
+} = require('./controllers/articles.controllers');
 const {
 	handleCustomErrors,
 	handle500Errors,
