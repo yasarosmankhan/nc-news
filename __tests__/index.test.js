@@ -310,3 +310,21 @@ describe('/api/comments/:comment_id', () => {
 			});
 	});
 });
+
+describe('/api/users', () => {
+	test('GET:200 return an array of users of the correct format', () => {
+		return request(app)
+			.get('/api/users')
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.users.length).toBe(4);
+				body.users.forEach((user) => {
+					expect(user).toMatchObject({
+						username: expect.any(String),
+						name: expect.any(String),
+						avatar_url: expect.any(String),
+					});
+				});
+			});
+	});
+});
