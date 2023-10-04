@@ -7,7 +7,7 @@ const data = require('../db/data/test-data/index');
 beforeEach(() => seed(data));
 afterAll(() => db.end());
 
-describe('GET /api/topics', () => {
+describe('/api/topics', () => {
 	test('GET:200 return an array of topics of the correct format', () => {
 		return request(app)
 			.get('/api/topics')
@@ -24,7 +24,7 @@ describe('GET /api/topics', () => {
 	});
 });
 
-describe('GET /api/invalid-path', () => {
+describe('/api/invalid-path', () => {
 	test('GET:404 returns no content message', () => {
 		return request(app)
 			.get('/api/invalid-path')
@@ -35,7 +35,7 @@ describe('GET /api/invalid-path', () => {
 	});
 });
 
-describe('GET /api endpoints', () => {
+describe('/api endpoints', () => {
 	test('should return an object describing all the available endpoints', () => {
 		return request(app)
 			.get('/api')
@@ -55,7 +55,7 @@ describe('GET /api endpoints', () => {
 	});
 });
 
-describe('GET /api/articles/:article_id', () => {
+describe('/api/articles/:article_id', () => {
 	test('GET:200 sends a single article to the client', () => {
 		return request(app)
 			.get('/api/articles/1')
@@ -91,7 +91,7 @@ describe('GET /api/articles/:article_id', () => {
 	});
 });
 
-describe('GET /api/articles', () => {
+describe('/api/articles', () => {
 	test('should return articles object with all articles', () => {
 		return request(app)
 			.get('/api/articles')
@@ -142,7 +142,7 @@ describe('GET /api/articles', () => {
 	});
 });
 
-describe('GET /api/articles/:article_id/comments', () => {
+describe('/api/articles/:article_id/comments', () => {
 	test('GET:200 sends an array of comments belonging to a single article to the client', () => {
 		return request(app)
 			.get('/api/articles/1/comments')
@@ -161,9 +161,17 @@ describe('GET /api/articles/:article_id/comments', () => {
 				});
 			});
 	});
+	test('GET:200 sends an empty array of comments if the id is valid, but there are no comments associated with the article', () => {
+		return request(app)
+			.get('/api/articles/2/comments')
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.comments).toEqual([]);
+			});
+	});
 	test('allows the client to change sortby created_at', () => {
 		return request(app)
-			.get('/api/articles/1/comments?sortby=created_at')
+			.get('/api/articles/1/comments')
 			.then(({ body }) => {
 				expect(body.comments).toBeSortedBy('created_at');
 			});

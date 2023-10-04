@@ -63,13 +63,32 @@ exports.selectCommentsByArticleId = (article_id) => {
 			message: 'Bad Request',
 		});
 	}
-	let queryStr =
-		'SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at;';
-	return db.query(queryStr, [article_id]).then((result) => {
-		if (result.rows.length === 0) {
-			return Promise.reject({ status: 404, message: 'Not Found' });
-		} else {
-			return result.rows;
+
+	const fetchArticle = () => {
+		const articleQueryStr = 'SELECT * FROM articles WHERE article_id = $1;';
+		return db.query(articleQueryStr, [article_id]).then((result) => {
+			return result;
+		});
+	};
+
+	const fetchComments = () => {
+		const commentsQueryStr =
+			'SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at;';
+		return db.query(commentsQueryStr, [article_id]);
+	};
+
+	return Promise.all([fetchArticle(), fetchComments()]).then(
+		([articleResult, commentsResult]) => {
+			if (articleResult.rows.length === 0) {
+				return Promise.reject({
+					status: 404,
+					message: 'Not Found',
+				});
+			} else {
+				return commentsResult.rows.length === 0
+					? []
+					: commentsResult.rows;
+			}
 		}
-	});
+	);
 };
