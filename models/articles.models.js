@@ -92,3 +92,24 @@ exports.selectCommentsByArticleId = (article_id) => {
 		}
 	);
 };
+
+exports.InsertCommentByArticleId = (article_id, newComment) => {
+	const { username, body } = newComment;
+	if (
+		article_id === undefined ||
+		username === undefined ||
+		body === undefined
+	) {
+		return Promise.reject({ status: 400, message: 'Bad Request' });
+	}
+
+	return db
+		.query(
+			`INSERT INTO comments (body, article_id, author) 
+				VALUES ($1, $2, $3) RETURNING *;`,
+			[body, article_id, username]
+		)
+		.then((result) => {
+			return result.rows[0];
+		});
+};

@@ -192,4 +192,35 @@ describe('/api/articles/:article_id/comments', () => {
 				expect(body.message).toBe('Bad Request');
 			});
 	});
+	test('POST:201 post a new comment and sends the new comment back to the client', () => {
+		const newComment = {
+			username: 'rogersop',
+			body: 'Maybe I am not a rabbit',
+		};
+		return request(app)
+			.post('/api/articles/2/comments')
+			.send(newComment)
+			.expect(201)
+			.then(({ body }) => {
+				expect(body.comment).toMatchObject({
+					comment_id: 19,
+					body: 'Maybe I am not a rabbit',
+					article_id: 2,
+					author: 'rogersop',
+					votes: 0,
+				});
+			});
+	});
+	test('POST:400 responds with an appropriate status and error message when provided with incomplete info', () => {
+		const newComment = {
+			body: 'Maybe I am not a rabbit',
+		};
+		return request(app)
+			.post('/api/articles/2/comments')
+			.send(newComment)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
+			});
+	});
 });
