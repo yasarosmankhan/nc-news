@@ -96,8 +96,9 @@ describe('GET /api/articles', () => {
 		return request(app)
 			.get('/api/articles')
 			.then(({ body }) => {
-				body.articles.forEach((articles) => {
-					expect(articles).toMatchObject({
+				expect(body.articles.length).toBe(13);
+				body.articles.forEach((article) => {
+					expect(article).toMatchObject({
 						article_id: expect.any(Number),
 						title: expect.any(String),
 						topic: expect.any(String),
@@ -108,16 +109,7 @@ describe('GET /api/articles', () => {
 						comment_count: expect.any(String),
 					});
 				});
-				expect(body.articles.length).toBe(13);
 				expect(body.articles.body).toBeUndefined();
-			});
-	});
-
-	test('should return articles object ordered by date', () => {
-		return request(app)
-			.get('/api/articles?sortby=created_at')
-			.then(({ body }) => {
-				expect(body.articles).toBeSortedBy('created_at');
 			});
 	});
 

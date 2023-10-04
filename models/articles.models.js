@@ -43,32 +43,15 @@ exports.selectArticles = (sortby, order) => {
 						ON a.article_id = c.article_id
 						GROUP BY a.article_id${orderByClause}${orderClause};`;
 
-	return db
-		.query(queryStr)
-		.then((result) => {
-			if (result.rows.length === 0) {
-				return Promise.reject({ status: 404, message: 'Not Found' });
-			}
-			const articlesWithoutBody = result.rows.map((article) => {
-				const { body, ...articleWithoutBody } = article;
-				return articleWithoutBody;
-			});
-
-			return articlesWithoutBody;
-		})
-		.catch((error) => {
-			return Promise.reject(error);
+	return db.query(queryStr).then((result) => {
+		if (result.rows.length === 0) {
+			return Promise.reject({ status: 404, message: 'Not Found' });
+		}
+		const articlesWithoutBody = result.rows.map((article) => {
+			const { body, ...articleWithoutBody } = article;
+			return articleWithoutBody;
 		});
-};
 
-// SELECT
-//     a.*,
-//     COUNT(c.comment_id) AS comment_count
-// FROM
-//     articles AS a
-// LEFT JOIN
-//     comments AS c
-// ON
-//     a.article_id = c.article_id
-// GROUP BY
-//     a.article_id
+		return articlesWithoutBody;
+	});
+};
