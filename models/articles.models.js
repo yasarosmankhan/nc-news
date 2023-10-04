@@ -4,7 +4,7 @@ exports.selectArticleById = (article_id) => {
 	if (isNaN(article_id)) {
 		return Promise.reject({
 			status: 400,
-			message: 'Bad request',
+			message: 'Bad Request',
 		});
 	}
 	let queryStr = 'SELECT * FROM articles WHERE article_id = $1;';
@@ -13,7 +13,7 @@ exports.selectArticleById = (article_id) => {
 		if (rows.length === 0) {
 			return Promise.reject({
 				status: 404,
-				message: 'Article does not exist',
+				message: 'Not Found',
 			});
 		} else {
 			return rows[0];
@@ -54,4 +54,41 @@ exports.selectArticles = (sortby, order) => {
 
 		return articlesWithoutBody;
 	});
+};
+
+exports.selectCommentsByArticleId = (article_id) => {
+	if (isNaN(article_id)) {
+		return Promise.reject({
+			status: 400,
+			message: 'Bad Request',
+		});
+	}
+
+	const fetchArticle = () => {
+		const articleQueryStr = 'SELECT * FROM articles WHERE article_id = $1;';
+		return db.query(articleQueryStr, [article_id]).then((result) => {
+			return result;
+		});
+	};
+
+	const fetchComments = () => {
+		const commentsQueryStr =
+			'SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at;';
+		return db.query(commentsQueryStr, [article_id]);
+	};
+
+	return Promise.all([fetchArticle(), fetchComments()]).then(
+		([articleResult, commentsResult]) => {
+			if (articleResult.rows.length === 0) {
+				return Promise.reject({
+					status: 404,
+					message: 'Not Found',
+				});
+			} else {
+				return commentsResult.rows.length === 0
+					? []
+					: commentsResult.rows;
+			}
+		}
+	);
 };
