@@ -5,6 +5,7 @@ const { getEndPoints } = require('./controllers/endpoints.controllers');
 const {
 	getArticleById,
 	getArticles,
+	getCommentsByArticleId,
 } = require('./controllers/articles.controllers');
 const {
 	handleCustomErrors,
@@ -18,6 +19,8 @@ app.get('/api', getEndPoints);
 
 app.get('/api/articles/:article_id', getArticleById);
 app.get('/api/articles', getArticles);
+
+app.get('/api/articles/:article_id/comments', getCommentsByArticleId);
 
 app.all('/*', handleWrongPathErrors);
 app.use(handleCustomErrors);

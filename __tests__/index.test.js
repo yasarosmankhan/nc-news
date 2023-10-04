@@ -78,7 +78,7 @@ describe('GET /api/articles/:article_id', () => {
 			.get('/api/articles/999')
 			.expect(404)
 			.then(({ body }) => {
-				expect(body.message).toBe('Article does not exist');
+				expect(body.message).toBe('Not Found');
 			});
 	});
 	test('GET:400 sends an appropriate status and error message when given an invalid id', () => {
@@ -86,7 +86,7 @@ describe('GET /api/articles/:article_id', () => {
 			.get('/api/articles/not-an-article')
 			.expect(400)
 			.then(({ body }) => {
-				expect(body.message).toBe('Bad request');
+				expect(body.message).toBe('Bad Request');
 			});
 	});
 });
@@ -135,6 +135,50 @@ describe('GET /api/articles', () => {
 	test('GET:400 sends an appropriate status and error message when given an invalid sortby', () => {
 		return request(app)
 			.get('/api/articles?order=invalid-order')
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
+			});
+	});
+});
+
+describe('GET /api/articles/:article_id/comments', () => {
+	test('GET:200 sends an array of comments belonging to a single article to the client', () => {
+		return request(app)
+			.get('/api/articles/1/comments')
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.comments.length).toBe(11);
+				body.comments.forEach((comment) => {
+					expect(comment).toMatchObject({
+						comment_id: expect.any(Number),
+						body: expect.any(String),
+						article_id: 1,
+						author: expect.any(String),
+						votes: expect.any(Number),
+						created_at: expect.any(String),
+					});
+				});
+			});
+	});
+	test('allows the client to change sortby created_at', () => {
+		return request(app)
+			.get('/api/articles/1/comments?sortby=created_at')
+			.then(({ body }) => {
+				expect(body.comments).toBeSortedBy('created_at');
+			});
+	});
+	test('GET:404 sends an appropriate status and error message when given a valid but non-existent id', () => {
+		return request(app)
+			.get('/api/articles/999/comments')
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe('Not Found');
+			});
+	});
+	test('GET:400 responds with an appropriate error message when given an invalid id', () => {
+		return request(app)
+			.get('/api/articles/not-an-id/comments')
 			.expect(400)
 			.then(({ body }) => {
 				expect(body.message).toBe('Bad Request');
