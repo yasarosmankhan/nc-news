@@ -125,3 +125,37 @@ exports.InsertCommentByArticleId = (article_id, newComment) => {
 		}
 	});
 };
+
+exports.updateArticleById = (votes, article_id) => {
+	if (article_id === undefined || !votes) {
+		return Promise.reject({ status: 400, message: 'Bad Request' });
+	}
+
+	const fetchArticle = () => {
+		const articleQueryStr = 'SELECT * FROM articles WHERE article_id = $1;';
+		return db.query(articleQueryStr, [article_id]).then((result) => {
+			return result;
+		});
+	};
+
+	return fetchArticle().then((articleResult) => {
+		if (articleResult.rows.length === 0) {
+			return Promise.reject({
+				status: 404,
+				message: 'Not Found',
+			});
+		} else {
+			const updateArticle = () => {
+				const updateQueryStr = `UPDATE articles
+										SET votes = $1
+										WHERE article_id = $2 
+										RETURNING *;`;
+				return db.query(updateQueryStr, [votes, article_id]);
+			};
+
+			return updateArticle().then((result) => {
+				return result.rows[0];
+			});
+		}
+	});
+};

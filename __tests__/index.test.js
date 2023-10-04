@@ -89,6 +89,43 @@ describe('/api/articles/:article_id', () => {
 				expect(body.message).toBe('Bad Request');
 			});
 	});
+	test('PATCH:200 update the article and send back the result to the client ', () => {
+		const votes = { inc_votes: 1 };
+		return request(app)
+			.patch('/api/articles/13')
+			.send(votes)
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.article).toMatchObject({
+					article_id: 13,
+					title: 'Another article about Mitch',
+					topic: 'mitch',
+					author: 'butter_bridge',
+					body: 'There will never be enough articles about Mitch!',
+					votes: 1,
+				});
+			});
+	});
+	test('PATCH:400 responds with an appropriate status and error message when provided with an empty vote object ', () => {
+		const votes = {};
+		return request(app)
+			.patch('/api/articles/13')
+			.send(votes)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
+			});
+	});
+	test('PATCH:404 responds with an appropriate status and error message when attempting to post a comment to a non-existent article', () => {
+		const votes = { inc_votes: 1 };
+		return request(app)
+			.patch('/api/articles/9999')
+			.send(votes)
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe('Not Found');
+			});
+	});
 });
 
 describe('/api/articles', () => {
