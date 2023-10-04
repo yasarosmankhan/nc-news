@@ -90,3 +90,54 @@ describe('GET /api/articles/:article_id', () => {
 			});
 	});
 });
+
+describe('GET /api/articles', () => {
+	test('should return articles object with all articles', () => {
+		return request(app)
+			.get('/api/articles')
+			.then(({ body }) => {
+				expect(body.articles.length).toBe(13);
+				body.articles.forEach((article) => {
+					expect(article).toMatchObject({
+						article_id: expect.any(Number),
+						title: expect.any(String),
+						topic: expect.any(String),
+						author: expect.any(String),
+						created_at: expect.any(String),
+						votes: expect.any(Number),
+						article_img_url: expect.any(String),
+						comment_count: expect.any(String),
+					});
+				});
+				expect(body.articles.body).toBeUndefined();
+			});
+	});
+
+	test('allows the client to change the sort order to descending', () => {
+		return request(app)
+			.get('/api/articles?sortby=created_at&order=desc')
+			.then(({ body }) => {
+				expect(body.articles).toBeSorted('created_at', {
+					descending: true,
+				});
+			});
+	});
+
+	test('GET:404 sends an appropriate status and error message when given an invalid sortby', () => {
+		return request(app)
+			.get('/api/articles?sortby=invalid-sort-by')
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe('Not Found');
+			});
+	});
+
+	test('GET:400 sends an appropriate status and error message when given an invalid sortby', () => {
+		return request(app)
+			.get('/api/articles?order=invalid-order')
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
+			});
+	});
+});
