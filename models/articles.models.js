@@ -21,9 +21,10 @@ exports.selectArticleById = (article_id) => {
 	});
 };
 
-exports.selectArticles = (sortby, order) => {
+exports.selectArticles = (sortby, order, filter) => {
 	const validSortBy = { created_at: 'created_at' };
 	const validOrder = { asc: 'ASC', desc: 'DESC' };
+	const validfilter = { cats: 'cats' };
 
 	if (sortby !== undefined && !(sortby in validSortBy)) {
 		return Promise.reject({ status: 404, message: 'Not Found' });
@@ -33,14 +34,21 @@ exports.selectArticles = (sortby, order) => {
 		return Promise.reject({ status: 400, message: 'Bad Request' });
 	}
 
+	if (filter !== undefined && !(filter in validfilter)) {
+		return Promise.reject({ status: 400, message: 'Bad Request' });
+	}
+
 	const orderByClause =
 		sortby !== undefined ? ` ORDER BY ${validSortBy[sortby]}` : '';
 	const orderClause = order !== undefined ? ` ${validOrder[order]}` : '';
+	const filterClause =
+		filter !== undefined ? `WHERE a.topic = '${validfilter[filter]}'` : '';
 
 	const queryStr = `SELECT a.*, COUNT(c.comment_id) AS comment_count
 						FROM articles AS a
 						LEFT JOIN comments AS c
 						ON a.article_id = c.article_id
+						${filterClause}
 						GROUP BY a.article_id${orderByClause}${orderClause};`;
 
 	return db.query(queryStr).then((result) => {

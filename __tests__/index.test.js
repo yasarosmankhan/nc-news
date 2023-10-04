@@ -177,6 +177,23 @@ describe('/api/articles', () => {
 				expect(body.message).toBe('Bad Request');
 			});
 	});
+	test('allows the client to filters the articles by the topic value', () => {
+		return request(app)
+			.get('/api/articles?filter=cats')
+			.then(({ body }) => {
+				expect(body.articles.length).toBe(1);
+				expect(body.articles).toBeSortedBy('topic');
+			});
+	});
+
+	test('GET:404 sends an appropriate status and error message when given an invalid filter', () => {
+		return request(app)
+			.get('/api/articles?filter=invalid-filter')
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
+			});
+	});
 });
 
 describe('/api/articles/:article_id/comments', () => {
