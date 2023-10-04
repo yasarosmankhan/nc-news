@@ -95,21 +95,33 @@ exports.selectCommentsByArticleId = (article_id) => {
 
 exports.InsertCommentByArticleId = (article_id, newComment) => {
 	const { username, body } = newComment;
-	if (
-		article_id === undefined ||
-		username === undefined ||
-		body === undefined
-	) {
+	if (article_id === undefined || !username || !body) {
 		return Promise.reject({ status: 400, message: 'Bad Request' });
 	}
 
-	return db
-		.query(
-			`INSERT INTO comments (body, article_id, author) 
-				VALUES ($1, $2, $3) RETURNING *;`,
-			[body, article_id, username]
-		)
-		.then((result) => {
-			return result.rows[0];
+	const fetchArticle = () => {
+		const articleQueryStr = 'SELECT * FROM articles WHERE article_id = $1;';
+		return db.query(articleQueryStr, [article_id]).then((result) => {
+			return result;
 		});
+	};
+
+	return fetchArticle().then((articleResult) => {
+		if (articleResult.rows.length === 0) {
+			return Promise.reject({
+				status: 404,
+				message: 'Not Found',
+			});
+		} else {
+			const insertComment = () => {
+				const commentsQueryStr = `INSERT INTO comments (body, article_id, author) 
+									VALUES ($1, $2, $3) RETURNING *;`;
+				return db.query(commentsQueryStr, [body, article_id, username]);
+			};
+
+			return insertComment().then((commentsResult) => {
+				return commentsResult.rows[0];
+			});
+		}
+	});
 };

@@ -223,4 +223,31 @@ describe('/api/articles/:article_id/comments', () => {
 				expect(body.message).toBe('Bad Request');
 			});
 	});
+	test('POST:400 responds with an appropriate status and error message when provided with an empty comment body', () => {
+		const newComment = {
+			username: 'rogersop',
+			body: '',
+		};
+		return request(app)
+			.post('/api/articles/2/comments')
+			.send(newComment)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
+			});
+	});
+
+	test('POST:404 responds with an appropriate status and error message when attempting to post a comment to a non-existent article', () => {
+		const newComment = {
+			username: 'rogersop',
+			body: 'This is a comment on a non-existent article',
+		};
+		return request(app)
+			.post('/api/articles/9999/comments')
+			.send(newComment)
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe('Not Found');
+			});
+	});
 });
