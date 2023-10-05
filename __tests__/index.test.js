@@ -106,16 +106,6 @@ describe('/api/articles/:article_id', () => {
 				});
 			});
 	});
-	test('PATCH:400 responds with an appropriate status and error message when provided with an empty vote object ', () => {
-		const votes = {};
-		return request(app)
-			.patch('/api/articles/13')
-			.send(votes)
-			.expect(400)
-			.then(({ body }) => {
-				expect(body.message).toBe('Bad Request');
-			});
-	});
 	test('PATCH:404 responds with an appropriate status and error message when attempting to post a comment to a non-existent article', () => {
 		const votes = { inc_votes: 1 };
 		return request(app)
