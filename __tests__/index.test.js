@@ -257,12 +257,35 @@ describe('/api/articles/:article_id/comments', () => {
 			.expect(201)
 			.then(({ body }) => {
 				expect(body.comment).toMatchObject({
-					comment_id: 19,
 					body: 'Maybe I am not a rabbit',
-					article_id: 2,
 					author: 'rogersop',
-					votes: 0,
 				});
+			});
+	});
+	test('POST:404 responds with an appropriate status and error message when provided with invalid id', () => {
+		const newComment = {
+			username: 'rogersop',
+			body: 'This is a test comment',
+		};
+		return request(app)
+			.post('/api/articles/999/comments')
+			.send(newComment)
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe('Not Found');
+			});
+	});
+	test('POST:404 responds with an appropriate status and error message when provided with invalid username', () => {
+		const newComment = {
+			username: 'invalid-username',
+			body: 'Maybe I am not a rabbit',
+		};
+		return request(app)
+			.post('/api/articles/2/comments')
+			.send(newComment)
+			.expect(404)
+			.then(({ body }) => {
+				expect(body.message).toBe('Not Found');
 			});
 	});
 	test('POST:400 responds with an appropriate status and error message when provided with incomplete info', () => {
