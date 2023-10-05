@@ -27,9 +27,9 @@ exports.selectArticles = (sortby, order, topic) => {
 	let validFilters = [];
 
 	const fetchTopic = () => {
-		const topicQueryStr = 'SELECT DISTINCT topic FROM articles;';
+		const topicQueryStr = 'SELECT slug FROM topics;';
 		return db.query(topicQueryStr).then((result) => {
-			validFilters = result.rows.map((row) => row.topic);
+			validFilters = result.rows.map((row) => row.slug);
 			return result;
 		});
 	};
@@ -61,9 +61,6 @@ exports.selectArticles = (sortby, order, topic) => {
 						GROUP BY a.article_id${orderByClause}${orderClause};`;
 
 		return db.query(queryStr).then((result) => {
-			if (result.rows.length === 0) {
-				return Promise.reject({ status: 404, message: 'Not Found' });
-			}
 			const articlesWithoutBody = result.rows.map((article) => {
 				const { body, ...articleWithoutBody } = article;
 				return articleWithoutBody;
@@ -164,6 +161,12 @@ exports.InsertCommentByArticleId = (article_id, newComment) => {
 };
 
 exports.updateArticleById = (votes, article_id) => {
+	if (isNaN(votes) || isNaN(article_id)) {
+		return Promise.reject({
+			status: 400,
+			message: 'Bad Request',
+		});
+	}
 	if (article_id === undefined || !votes) {
 		return Promise.reject({ status: 400, message: 'Bad Request' });
 	}

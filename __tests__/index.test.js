@@ -106,6 +106,23 @@ describe('/api/articles/:article_id', () => {
 				});
 			});
 	});
+	test('PATCH:200 update the article and ignores the unnecessary properties sent in votes object ', () => {
+		const votes = { inc_votes: 1, test: 'test', test1: 'test1' };
+		return request(app)
+			.patch('/api/articles/13')
+			.send(votes)
+			.expect(200)
+			.then(({ body }) => {
+				expect(body.article).toMatchObject({
+					article_id: 13,
+					title: 'Another article about Mitch',
+					topic: 'mitch',
+					author: 'butter_bridge',
+					body: 'There will never be enough articles about Mitch!',
+					votes: 1,
+				});
+			});
+	});
 	test('PATCH:404 responds with an appropriate status and error message when attempting to post a comment to a non-existent article', () => {
 		const votes = { inc_votes: 1 };
 		return request(app)
@@ -114,6 +131,26 @@ describe('/api/articles/:article_id', () => {
 			.expect(404)
 			.then(({ body }) => {
 				expect(body.message).toBe('Not Found');
+			});
+	});
+	test('PATCH:400 responds with an appropriate status and error message when attempting to post a comment to a invalid id', () => {
+		const votes = { inc_votes: 1 };
+		return request(app)
+			.patch('/api/articles/invalid-id')
+			.send(votes)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
+			});
+	});
+	test('PATCH:400 responds with an appropriate status and error message if votes are not a number', () => {
+		const votes = { inc_votes: 'NaN' };
+		return request(app)
+			.patch('/api/articles/13')
+			.send(votes)
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
 			});
 	});
 });
@@ -177,12 +214,12 @@ describe('/api/articles', () => {
 			});
 	});
 
-	test('GET:400 when the topic is valid but there are no assocaited articles', () => {
+	test('GET:200 when the topic is valid but there are no assocaited articles', () => {
 		return request(app)
-			.get('/api/articles?topic=dog')
-			.expect(400)
+			.get('/api/articles?topic=paper')
+			.expect(200)
 			.then(({ body }) => {
-				expect(body.message).toBe('Bad Request');
+				expect(body.articles.length).toBe(0);
 			});
 	});
 
