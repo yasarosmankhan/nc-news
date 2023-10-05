@@ -21,46 +21,56 @@ exports.selectArticleById = (article_id) => {
 	});
 };
 
-exports.selectArticles = (sortby, order, filter) => {
+exports.selectArticles = (sortby, order, topic) => {
 	const validSortBy = { created_at: 'created_at' };
 	const validOrder = { asc: 'ASC', desc: 'DESC' };
-	const validfilter = { cats: 'cats' };
+	let validFilters = [];
 
-	if (sortby !== undefined && !(sortby in validSortBy)) {
-		return Promise.reject({ status: 404, message: 'Not Found' });
-	}
+	const fetchTopic = () => {
+		const topicQueryStr = 'SELECT DISTINCT topic FROM articles;';
+		return db.query(topicQueryStr).then((result) => {
+			validFilters = result.rows.map((row) => row.topic);
+			return result;
+		});
+	};
 
-	if (order !== undefined && !(order in validOrder)) {
-		return Promise.reject({ status: 400, message: 'Bad Request' });
-	}
+	return fetchTopic().then(() => {
+		if (sortby !== undefined && !(sortby in validSortBy)) {
+			return Promise.reject({ status: 400, message: 'Bad Request' });
+		}
 
-	if (filter !== undefined && !(filter in validfilter)) {
-		return Promise.reject({ status: 400, message: 'Bad Request' });
-	}
+		if (order !== undefined && !(order in validOrder)) {
+			return Promise.reject({ status: 400, message: 'Bad Request' });
+		}
 
-	const orderByClause =
-		sortby !== undefined ? ` ORDER BY ${validSortBy[sortby]}` : '';
-	const orderClause = order !== undefined ? ` ${validOrder[order]}` : '';
-	const filterClause =
-		filter !== undefined ? `WHERE a.topic = '${validfilter[filter]}'` : '';
+		if (topic !== undefined && !validFilters.includes(topic)) {
+			return Promise.reject({ status: 400, message: 'Bad Request' });
+		}
 
-	const queryStr = `SELECT a.*, COUNT(c.comment_id) AS comment_count
+		const orderByClause =
+			sortby !== undefined ? ` ORDER BY ${validSortBy[sortby]}` : '';
+		const orderClause = order !== undefined ? ` ${validOrder[order]}` : '';
+		const filterClause =
+			topic !== undefined ? `WHERE a.topic = '${topic}'` : '';
+
+		const queryStr = `SELECT a.*, COUNT(c.comment_id) AS comment_count
 						FROM articles AS a
 						LEFT JOIN comments AS c
 						ON a.article_id = c.article_id
 						${filterClause}
 						GROUP BY a.article_id${orderByClause}${orderClause};`;
 
-	return db.query(queryStr).then((result) => {
-		if (result.rows.length === 0) {
-			return Promise.reject({ status: 404, message: 'Not Found' });
-		}
-		const articlesWithoutBody = result.rows.map((article) => {
-			const { body, ...articleWithoutBody } = article;
-			return articleWithoutBody;
-		});
+		return db.query(queryStr).then((result) => {
+			if (result.rows.length === 0) {
+				return Promise.reject({ status: 404, message: 'Not Found' });
+			}
+			const articlesWithoutBody = result.rows.map((article) => {
+				const { body, ...articleWithoutBody } = article;
+				return articleWithoutBody;
+			});
 
-		return articlesWithoutBody;
+			return articlesWithoutBody;
+		});
 	});
 };
 

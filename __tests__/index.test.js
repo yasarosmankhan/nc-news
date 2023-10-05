@@ -150,16 +150,16 @@ describe('/api/articles', () => {
 			});
 	});
 
-	test('GET:404 sends an appropriate status and error message when given an invalid sortby', () => {
+	test('GET:400 sends an appropriate status and error message when given an invalid sortby', () => {
 		return request(app)
 			.get('/api/articles?sortby=invalid-sort-by')
-			.expect(404)
+			.expect(400)
 			.then(({ body }) => {
-				expect(body.message).toBe('Not Found');
+				expect(body.message).toBe('Bad Request');
 			});
 	});
 
-	test('GET:400 sends an appropriate status and error message when given an invalid sortby', () => {
+	test('GET:400 sends an appropriate status and error message when given an invalid order', () => {
 		return request(app)
 			.get('/api/articles?order=invalid-order')
 			.expect(400)
@@ -167,18 +167,28 @@ describe('/api/articles', () => {
 				expect(body.message).toBe('Bad Request');
 			});
 	});
-	test('allows the client to filters the articles by the topic value', () => {
+	test('GET:200 when the topic is valid should filters the articles by the topic value specified in the query ', () => {
 		return request(app)
-			.get('/api/articles?filter=cats')
+			.get('/api/articles?topic=cats')
+			.expect(200)
 			.then(({ body }) => {
 				expect(body.articles.length).toBe(1);
 				expect(body.articles).toBeSortedBy('topic');
 			});
 	});
 
-	test('GET:404 sends an appropriate status and error message when given an invalid filter', () => {
+	test('GET:400 when the topic is valid but there are no assocaited articles', () => {
 		return request(app)
-			.get('/api/articles?filter=invalid-filter')
+			.get('/api/articles?topic=dog')
+			.expect(400)
+			.then(({ body }) => {
+				expect(body.message).toBe('Bad Request');
+			});
+	});
+
+	test('GET:400 sends an appropriate status and error message when given an invalid filter', () => {
+		return request(app)
+			.get('/api/articles?topic=invalid-filter')
 			.expect(400)
 			.then(({ body }) => {
 				expect(body.message).toBe('Bad Request');
