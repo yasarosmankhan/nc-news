@@ -8,7 +8,6 @@ exports.handleCustomErrors = (err, req, res, next) => {
 
 exports.handleWrongPathErrors = (req, res, next) => {
 	res.status(404).send({ message: 'Wrong Path!' });
-	next(err);
 };
 
 exports.handle500Errors = (err, req, res, next) => {
