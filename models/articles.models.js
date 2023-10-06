@@ -7,7 +7,12 @@ exports.selectArticleById = (article_id) => {
 			message: 'Bad Request',
 		});
 	}
-	let queryStr = 'SELECT * FROM articles WHERE article_id = $1;';
+	let queryStr = `SELECT a.*, COUNT(c.comment_id) AS comment_count
+					FROM articles AS a
+					LEFT JOIN comments AS c
+					ON a.article_id = c.article_id
+					WHERE a.article_id = $1
+					GROUP BY a.article_id;`;
 
 	return db.query(queryStr, [article_id]).then(({ rows }) => {
 		if (rows.length === 0) {
