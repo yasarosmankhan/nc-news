@@ -166,12 +166,6 @@ exports.InsertCommentByArticleId = (article_id, newComment) => {
 };
 
 exports.updateArticleById = (votes, article_id) => {
-	if (isNaN(votes) || isNaN(article_id)) {
-		return Promise.reject({
-			status: 400,
-			message: 'Bad Request',
-		});
-	}
 	if (article_id === undefined || !votes) {
 		return Promise.reject({ status: 400, message: 'Bad Request' });
 	}
@@ -206,12 +200,6 @@ exports.updateArticleById = (votes, article_id) => {
 };
 
 exports.removeCommentById = (comment_id) => {
-	if (isNaN(comment_id)) {
-		return Promise.reject({
-			status: 400,
-			message: 'Bad Request',
-		});
-	}
 	return db
 		.query('DELETE FROM comments WHERE comment_id = $1 RETURNING *;', [
 			comment_id,

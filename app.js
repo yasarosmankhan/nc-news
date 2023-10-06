@@ -14,6 +14,7 @@ const {
 	handleCustomErrors,
 	handle500Errors,
 	handleWrongPathErrors,
+	handlePSQLError,
 } = require('./controllers/errors.controllers');
 const { getUsers } = require('./controllers/users.controllers');
 
@@ -33,6 +34,7 @@ app.patch('/api/articles/:article_id', updateArticleById);
 app.delete('/api/comments/:comment_id', deleteCommentById);
 
 app.all('/*', handleWrongPathErrors);
+app.use(handlePSQLError);
 app.use(handleCustomErrors);
 app.use(handle500Errors);
 
