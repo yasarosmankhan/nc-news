@@ -26,54 +26,53 @@ exports.selectArticleById = (article_id) => {
 	});
 };
 
-exports.selectArticles = (sortby, order, topic) => {
-	const validSortBy = { created_at: 'created_at' };
+const fetchTopic = () => {
+	const topicQueryStr = 'SELECT slug FROM topics;';
+	return db.query(topicQueryStr).then((result) => {
+		validFilters = result.rows.map((row) => row.slug);
+		return validFilters;
+	});
+};
+
+const fetchSortBy = async (validSortBy) => {
+	const sortbyQueryStr = 'SELECT * FROM articles;';
+	const result = await db.query(sortbyQueryStr);
+	validSortBy = Object.keys(result.rows[0]);
+	return validSortBy;
+};
+
+exports.selectArticles = async (sortby = 'created_at', order, topic) => {
+	const validSortBy = await fetchSortBy();
+	const validFilters = await fetchTopic();
 	const validOrder = { asc: 'ASC', desc: 'DESC' };
-	let validFilters = [];
 
-	const fetchTopic = () => {
-		const topicQueryStr = 'SELECT slug FROM topics;';
-		return db.query(topicQueryStr).then((result) => {
-			validFilters = result.rows.map((row) => row.slug);
-			return result;
-		});
-	};
+	if (sortby !== undefined && !validSortBy.includes(sortby)) {
+		return Promise.reject({ status: 400, message: 'Bad Request' });
+	}
+	if (order !== undefined && !(order in validOrder)) {
+		return Promise.reject({ status: 400, message: 'Bad Request' });
+	}
+	if (topic !== undefined && !validFilters.includes(topic)) {
+		return Promise.reject({ status: 400, message: 'Bad Request' });
+	}
+	const orderByClause = sortby !== undefined ? ` ORDER BY ${sortby}` : '';
+	const orderClause = order !== undefined ? ` ${validOrder[order]}` : '';
+	const filterClause =
+		topic !== undefined ? `WHERE a.topic = '${topic}'` : '';
 
-	return fetchTopic().then(() => {
-		if (sortby !== undefined && !(sortby in validSortBy)) {
-			return Promise.reject({ status: 400, message: 'Bad Request' });
-		}
-
-		if (order !== undefined && !(order in validOrder)) {
-			return Promise.reject({ status: 400, message: 'Bad Request' });
-		}
-
-		if (topic !== undefined && !validFilters.includes(topic)) {
-			return Promise.reject({ status: 400, message: 'Bad Request' });
-		}
-
-		const orderByClause =
-			sortby !== undefined ? ` ORDER BY ${validSortBy[sortby]}` : '';
-		const orderClause = order !== undefined ? ` ${validOrder[order]}` : '';
-		const filterClause =
-			topic !== undefined ? `WHERE a.topic = '${topic}'` : '';
-
-		const queryStr = `SELECT a.*, COUNT(c.comment_id) AS comment_count
+	const queryStr = `SELECT a.*, COUNT(c.comment_id) AS comment_count
 						FROM articles AS a
 						LEFT JOIN comments AS c
 						ON a.article_id = c.article_id
 						${filterClause}
 						GROUP BY a.article_id${orderByClause}${orderClause};`;
 
-		return db.query(queryStr).then((result) => {
-			const articlesWithoutBody = result.rows.map((article) => {
-				const { body, ...articleWithoutBody } = article;
-				return articleWithoutBody;
-			});
-
-			return articlesWithoutBody;
-		});
+	const dbQuery = await db.query(queryStr);
+	const articlesWithoutBody = dbQuery.rows.map((article) => {
+		const { body, ...articleWithoutBody } = article;
+		return articleWithoutBody;
 	});
+	return articlesWithoutBody;
 };
 
 exports.selectCommentsByArticleId = (article_id) => {

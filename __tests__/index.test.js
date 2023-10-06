@@ -177,17 +177,31 @@ describe('/api/articles', () => {
 				expect(body.articles.body).toBeUndefined();
 			});
 	});
-
-	test('allows the client to change the sort order to descending', () => {
+	test('should return all articles sorted by created_at and sort order to descending by default', () => {
 		return request(app)
-			.get('/api/articles?sortby=created_at&order=desc')
+			.get('/api/articles')
 			.then(({ body }) => {
 				expect(body.articles).toBeSorted('created_at', {
 					descending: true,
 				});
 			});
 	});
-
+	test('allows the client to change the filter by any column name', () => {
+		return request(app)
+			.get('/api/articles?sortby=author')
+			.then(({ body }) => {
+				expect(body.articles).toBeSorted('author');
+			});
+	});
+	test('allows the client to change the sort order to ascending', () => {
+		return request(app)
+			.get('/api/articles?sortby=author&order=asc')
+			.then(({ body }) => {
+				expect(body.articles).toBeSorted('author', {
+					ascending: true,
+				});
+			});
+	});
 	test('GET:400 sends an appropriate status and error message when given an invalid sortby', () => {
 		return request(app)
 			.get('/api/articles?sortby=invalid-sort-by')
