@@ -52,11 +52,9 @@ exports.selectArticles = (sortby, order, topic) => {
 			return Promise.reject({ status: 400, message: 'Bad Request' });
 		}
 
-		const orderByClause =
-			sortby !== undefined ? ` ORDER BY ${validSortBy[sortby]}` : '';
+		const orderByClause = sortby !== undefined ? ` ORDER BY ${validSortBy[sortby]}` : '';
 		const orderClause = order !== undefined ? ` ${validOrder[order]}` : '';
-		const filterClause =
-			topic !== undefined ? `WHERE a.topic = '${topic}'` : '';
+		const filterClause = topic !== undefined ? `WHERE a.topic = '${topic}'` : '';
 
 		const queryStr = `SELECT a.*, COUNT(c.comment_id) AS comment_count
 						FROM articles AS a
@@ -105,9 +103,7 @@ exports.selectCommentsByArticleId = (article_id) => {
 					message: 'Not Found',
 				});
 			} else {
-				return commentsResult.rows.length === 0
-					? []
-					: commentsResult.rows;
+				return commentsResult.rows.length === 0 ? [] : commentsResult.rows;
 			}
 		}
 	);
@@ -151,11 +147,7 @@ exports.InsertCommentByArticleId = (article_id, newComment) => {
 				const insertComment = () => {
 					const commentsQueryStr = `INSERT INTO comments (body, article_id, author) 
 									 VALUES ($1, $2, $3) RETURNING *;`;
-					return db.query(commentsQueryStr, [
-						body,
-						article_id,
-						username,
-					]);
+					return db.query(commentsQueryStr, [body, article_id, username]);
 				};
 
 				return insertComment().then((commentsResult) => {
@@ -184,12 +176,15 @@ exports.updateArticleById = (votes, article_id) => {
 				message: 'Not Found',
 			});
 		} else {
+			const currentVotes = articleResult.rows[0].votes; 
+			const newVotes = currentVotes + votes;
+
 			const updateArticle = () => {
 				const updateQueryStr = `UPDATE articles
-										SET votes = $1
-										WHERE article_id = $2 
-										RETURNING *;`;
-				return db.query(updateQueryStr, [votes, article_id]);
+								  SET votes = $1
+								  WHERE article_id = $2 
+								  RETURNING *;`;
+				return db.query(updateQueryStr, [newVotes, article_id]); 
 			};
 
 			return updateArticle().then((result) => {
@@ -201,9 +196,7 @@ exports.updateArticleById = (votes, article_id) => {
 
 exports.removeCommentById = (comment_id) => {
 	return db
-		.query('DELETE FROM comments WHERE comment_id = $1 RETURNING *;', [
-			comment_id,
-		])
+		.query('DELETE FROM comments WHERE comment_id = $1 RETURNING *;', [comment_id])
 		.then((result) => {
 			if (result.rows.length === 0) {
 				return Promise.reject({
