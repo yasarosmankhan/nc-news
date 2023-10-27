@@ -27,7 +27,11 @@ exports.selectArticleById = (article_id) => {
 };
 
 exports.selectArticles = (sortby, order, topic) => {
-	const validSortBy = { created_at: 'created_at' };
+	const validSortBy = {
+		created_at: 'created_at',
+		comment_count: 'comment_count',
+		votes: 'votes',
+	};
 	const validOrder = { asc: 'ASC', desc: 'DESC' };
 	let validFilters = [];
 
@@ -176,7 +180,7 @@ exports.updateArticleById = (votes, article_id) => {
 				message: 'Not Found',
 			});
 		} else {
-			const currentVotes = articleResult.rows[0].votes; 
+			const currentVotes = articleResult.rows[0].votes;
 			const newVotes = currentVotes + votes;
 
 			const updateArticle = () => {
@@ -184,7 +188,7 @@ exports.updateArticleById = (votes, article_id) => {
 								  SET votes = $1
 								  WHERE article_id = $2 
 								  RETURNING *;`;
-				return db.query(updateQueryStr, [newVotes, article_id]); 
+				return db.query(updateQueryStr, [newVotes, article_id]);
 			};
 
 			return updateArticle().then((result) => {

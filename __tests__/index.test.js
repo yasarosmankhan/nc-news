@@ -188,6 +188,46 @@ describe('/api/articles', () => {
 			});
 	});
 
+	test('allows the client to change the sort order to ascending', () => {
+		return request(app)
+			.get('/api/articles?sortby=created_at&order=asc')
+			.then(({ body }) => {
+				expect(body.articles).toBeSorted('created_at', {
+					ascending: true,
+				});
+			});
+	});
+
+	test('allows the client to change the sort order to descending', () => {
+		return request(app)
+			.get('/api/articles?sortby=votes&order=desc')
+			.then(({ body }) => {
+				expect(body.articles).toBeSorted('votes', {
+					descending: true,
+				});
+			});
+	});
+
+	test('allows the client to change the sort order to descending', () => {
+		return request(app)
+			.get('/api/articles?sortby=comment_count&order=desc')
+			.then(({ body }) => {
+				expect(body.articles).toBeSorted('comment_count', {
+					descending: true,
+				});
+			});
+	});
+
+	test('allows the client to change the sort order to ascending', () => {
+		return request(app)
+			.get('/api/articles?sortby=comment_count&order=asc')
+			.then(({ body }) => {
+				expect(body.articles).toBeSorted('comment_count', {
+					ascending: true,
+				});
+			});
+	});
+
 	test('GET:400 sends an appropriate status and error message when given an invalid sortby', () => {
 		return request(app)
 			.get('/api/articles?sortby=invalid-sort-by')
